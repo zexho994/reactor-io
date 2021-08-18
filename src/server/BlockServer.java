@@ -13,7 +13,7 @@ import java.nio.file.StandardOpenOption;
  * @author Zexho
  * @date 2021/8/18 6:41 下午
  */
-public class Server {
+public class BlockServer {
 
 
     public static void main(String[] args) throws IOException {
