@@ -33,8 +33,6 @@ public class NonBlockServer {
             Iterator<SelectionKey> selectionKeys = selector.selectedKeys().iterator();
             while (selectionKeys.hasNext()) {
                 SelectionKey selectionKey = selectionKeys.next();
-                // 移除处理过的事件
-                selectionKeys.remove();
                 // 如果是连接事件
                 if (selectionKey.isAcceptable()) {
                     System.out.println("=> selector accept key");
@@ -59,6 +57,8 @@ public class NonBlockServer {
                         readBuffer.clear();
                     }
                 }
+                // 移除处理过的事件
+                selectionKeys.remove();
             }
         }
     }

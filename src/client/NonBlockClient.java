@@ -50,8 +50,6 @@ public class NonBlockClient {
         }
 
         System.out.println("文件写入完成");
-
-
     }
 
 }
