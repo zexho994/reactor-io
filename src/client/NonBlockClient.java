@@ -4,19 +4,32 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Iterator;
 
 /**
  * @author Zexho
- * @date 2021/8/18 6:33 下午
+ * @date 2021/8/19 8:50 上午
  */
-public class Client {
+public class NonBlockClient {
+
     public static void main(String[] args) throws IOException {
 
         // 1. 获取通道
         SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("127.0.0.1", 6666));
+
+        // 1.1切换成非阻塞模式
+        socketChannel.configureBlocking(false);
+
+        // 1.2获取选择器
+        Selector selector = Selector.open();
+
+        // 1.3将通道注册到选择器中，获取服务端返回的数据
+        socketChannel.register(selector, SelectionKey.OP_READ);
 
         // 2. 发送一张图片给服务端吧
         FileChannel fileChannel = FileChannel.open(Paths.get("static/send.jpg"), StandardOpenOption.READ);
@@ -36,8 +49,9 @@ public class Client {
             buffer.clear();
         }
 
-        // 5. 关闭流
-        fileChannel.close();
-        socketChannel.close();
+        System.out.println("文件写入完成");
+
+
     }
+
 }
