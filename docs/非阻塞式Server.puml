@@ -1,0 +1,17 @@
+@startuml
+start
+:open server-socket channel;
+:configure false;
+:bind socket address;
+:open selector;
+:selector register op_accept;
+    switch (selector.key?)
+    case (acceptable)
+        :accept client;
+        :selector register op_read;
+    case (readable)
+        :read data to buffer by channel;
+    endswitch
+:do while;
+detach
+@enduml
