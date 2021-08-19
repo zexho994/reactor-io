@@ -21,7 +21,7 @@ public class PollServer {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         ServerSocketChannel ssc = ServerSocketChannel.open();
-        ssc.socket().bind(new InetSocketAddress("127.0.0.1", 8000));
+        ssc.socket().bind(new InetSocketAddress("127.0.0.1", 6666));
         ssc.configureBlocking(false);
 
         Selector selector = Selector.open();
