@@ -1,0 +1,21 @@
+@startuml
+server -> reactor ++: new
+reactor -> reactor : 绑定端口
+reactor -> reactor : 设置非阻塞模式
+reactor -> reactor : 注册op_accept事件
+reactor -> reactor : 添加Acceptor附件
+return reactor
+
+server -> reactor ++: run
+reactor -> reactor : 阻塞等待事件
+reactor -> events ++: 遍历事件列表
+events -> dispatch ++: 分发事件
+dispatch -> dispatch : 获取key中的附件Acceptor
+dispatch -> acceptor ++: run
+acceptor -> acceptor : 获取accept
+return done
+return
+reactor -> reactor : 清楚列表中事件
+return 遍历完成
+return done
+@enduml
