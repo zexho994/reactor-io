@@ -7,6 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -50,7 +51,7 @@ public class PollServer {
                     readBuff.clear();
                     socketChannel.read(readBuff);
                     readBuff.flip();
-                    System.out.println("received : " + new String(readBuff.array()));
+                    System.out.println("received : " + StandardCharsets.UTF_8.decode(readBuff));
                     key.interestOps(SelectionKey.OP_WRITE);
                 } else if (key.isWritable()) {
                     writeBuff.rewind();
