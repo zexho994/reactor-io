@@ -44,13 +44,4 @@ public class PollClient {
         }
     }
 
-    private static void run() {
-        try {
-            createClient("client 1");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 }
