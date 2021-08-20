@@ -46,11 +46,18 @@ public class Reactor implements Runnable {
             for (SelectionKey event : events) {
                 dispatch(event);
             }
+            // 清楚事件
             events.clear();
         }
     }
 
+    /**
+     * 分发事件
+     *
+     * @param key 事件
+     */
     void dispatch(SelectionKey key) {
+        // 拿出来的可能两种
         Runnable r = (Runnable) (key.attachment());
         if (r != null) {
             r.run();

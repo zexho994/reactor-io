@@ -27,7 +27,7 @@ public class Handler implements Runnable {
         // 注册read就绪事件
         sk.interestOps(SelectionKey.OP_READ);
         // 唤醒select()阻塞的线程
-        selector.wakeup();
+//        selector.wakeup();
     }
 
     boolean inputIsComplete() {
@@ -49,7 +49,8 @@ public class Handler implements Runnable {
         try {
             if (state == READING) {
                 read();
-            } else if (state == SENDING) {
+            }
+            if (state == SENDING) {
                 send();
             }
         } catch (IOException ex) {
