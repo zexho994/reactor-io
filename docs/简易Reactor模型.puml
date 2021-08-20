@@ -8,12 +8,14 @@ participant read
 participant send
 
 autonumber
+==启动==
 server -> reactor ++: new
 reactor -> reactor : 绑定端口
 reactor -> reactor : 设置非阻塞模式
 reactor -> reactor : 注册op_accept事件
 reactor -> reactor : 添加Acceptor附件
 return reactor
+==运行==
 server -> reactor ++: run
 reactor -> reactor ++: select( ) 阻塞
 reactor -> reactor --: 获取事件列表

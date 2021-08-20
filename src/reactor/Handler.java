@@ -31,77 +31,46 @@ public class Handler implements Runnable {
         selector.wakeup();
     }
 
-    // 判断是否读完成
-    boolean inputIsComplete() throws IOException {
-        if (!channel.finishConnect()){
-            return false;
-        }
-        System.out.println("input is complete");
-        return true;
-    }
-
-    // 判断是否写完
-    boolean outputIsComplete() {
-        if (writeBuffer.hasRemaining()) {
-            return false;
-        }
-        System.out.println("out is complete");
-        return true;
-    }
-
     void process() {
-        System.out.println("process start");
-        // 打印收到的
-        System.out.println("received : " + StandardCharsets.UTF_8.decode(readBuffer));
-        System.out.println("process done");
+        System.out.println("request : " + StandardCharsets.UTF_8.decode(readBuffer));
     }
 
     @Override
     public void run() {
         try {
             if (state == READING) {
-                read();
+                handleRequest();
             }
             if (state == SENDING) {
-                send();
+                handleResponse();
             }
         } catch (IOException ex) {
             System.out.println("Handler run error" + ex);
         }
     }
 
-    void read() throws IOException {
-        System.out.println("read...");
-
-        // channel的数据写入到中readBuffer中
+    void handleRequest() throws IOException {
+        // 读取数据
         channel.read(readBuffer);
-
-        if (inputIsComplete()) {
-            // 反转buffer
-            readBuffer.flip();
-            // 执行处理逻辑
-            process();
-            // 转换成写状态
-            state = SENDING;
-            // 设置channel中的key为write事件
-            sk.interestOps(SelectionKey.OP_WRITE);
-        }
+        // 反转buffer
+        readBuffer.flip();
+        // 执行处理逻辑
+        process();
+        // 清理读缓存
+        readBuffer.clear();
+        // 转换成写状态
+        state = SENDING;
+        // 设置channel中的key为write事件
+        sk.interestOps(SelectionKey.OP_WRITE);
     }
 
-    void send() throws IOException {
-        System.out.println("send...");
-
-        // writeBuffer的数据写入到channel中
+    void handleResponse() throws IOException {
+        writeBuffer.put("success".getBytes(StandardCharsets.UTF_8));
+        writeBuffer.flip();
+        // 写response到channel中
         channel.write(writeBuffer);
-
-        // 如果写完
-        if (outputIsComplete()) {
-            // 清空writeBuffer
-            writeBuffer.clear();
-            writeBuffer.flip();
-            // 处理完后，移除该事件
-            sk.cancel();
-        }
+        // 处理完后，移除该事件
+        sk.cancel();
     }
 
 }
