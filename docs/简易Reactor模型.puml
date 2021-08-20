@@ -4,6 +4,8 @@ participant reactor
 participant dispatch
 participant acceptor
 participant handler
+participant read
+participant send
 
 autonumber
 server -> reactor ++: new
@@ -12,13 +14,14 @@ reactor -> reactor : 设置非阻塞模式
 reactor -> reactor : 注册op_accept事件
 reactor -> reactor : 添加Acceptor附件
 return reactor
-
 server -> reactor ++: run
 reactor -> reactor ++: select( ) 阻塞
 reactor -> reactor --: 获取事件列表
 reactor -> dispatch ++: 分发事件 dispatch(key)
-dispatch -> dispatch : 获取key中的附件acceptor
-dispatch -> acceptor ++: acceptor.run()
+dispatch -> dispatch : 获取事件key的附件
+note over dispatch: 附件的类型有两种：1.acceptor 2.handler
+alt attach = acceptor
+dispatch -> acceptor ++: run
 acceptor -> acceptor : 获取连接事件的channel
 acceptor -> handler ++: new
 handler -> handler : handler注册read事件监听
@@ -27,6 +30,14 @@ handler -> handler : 设置事件为OP_READ
 handler -> handler : wakeup( ) 唤醒阻塞线程
 return run done
 return run done
+else attach = handler
+dispatch -> handler ++: run
+handler -> read ++: 执行read()方法
+return ok
+handler -> send ++: 执行send()方法
+return ok
+return run done
+end
 return 遍历完成
 reactor -> reactor : 清除列表中事件
 return run done
