@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.util.Set;
 
 /**
@@ -14,16 +13,22 @@ import java.util.Set;
  */
 public class Reactor implements Runnable {
 
-    final Selector selector;
-    final ServerSocketChannel serverSocket;
+    final Selector reactor_selector;
+    final ServerSocketChannel reactor_channel;
 
     public Reactor(int port) throws IOException {
-        selector = Selector.open();
-        serverSocket = ServerSocketChannel.open();
-        serverSocket.socket().bind(new InetSocketAddress(port));
-        serverSocket.configureBlocking(false);
-        SelectionKey sk = serverSocket.register(selector, SelectionKey.OP_ACCEPT);
-        sk.attach(new Acceptor());
+        // 打开selector
+        reactor_selector = Selector.open();
+        // 打开一个通道
+        reactor_channel = ServerSocketChannel.open();
+        // 绑定端口
+        reactor_channel.socket().bind(new InetSocketAddress(port));
+        // 设置非阻塞
+        reactor_channel.configureBlocking(false);
+        // 注册一个接受连接的事件
+        SelectionKey sk = reactor_channel.register(reactor_selector, SelectionKey.OP_ACCEPT);
+        // 事件上添加一个Acceptor对象
+        sk.attach(new Acceptor(reactor_channel, reactor_selector));
     }
 
     @Override
@@ -31,12 +36,12 @@ public class Reactor implements Runnable {
         while (!Thread.interrupted()) {
             try {
                 // 阻塞等待事件
-                selector.select();
+                reactor_selector.select();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             // 获取所有事件
-            Set<SelectionKey> events = selector.selectedKeys();
+            Set<SelectionKey> events = reactor_selector.selectedKeys();
             // 分发事件
             for (SelectionKey event : events) {
                 dispatch(event);
@@ -46,25 +51,9 @@ public class Reactor implements Runnable {
     }
 
     void dispatch(SelectionKey key) {
-        Acceptor r = (Acceptor) (key.attachment());
+        Runnable r = (Runnable) (key.attachment());
         if (r != null) {
             r.run();
-        }
-    }
-
-    class Acceptor implements Runnable {
-        @Override
-        public void run() {
-            try {
-                //等待连接
-                SocketChannel accept = serverSocket.accept();
-                //如果有新的连接
-                if (accept != null) {
-                    new Handler(selector, accept);
-                }
-            } catch (Exception ex) {
-                System.out.println("acceptor run error" + ex);
-            }
         }
     }
 

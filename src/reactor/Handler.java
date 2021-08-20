@@ -22,8 +22,11 @@ public class Handler implements Runnable {
         channel = sc;
         sc.configureBlocking(false);
         sk = channel.register(selector, READING);
+        // 将handler作为回调
         sk.attach(this);
+        // 注册read就绪事件
         sk.interestOps(SelectionKey.OP_READ);
+        // 唤醒select()阻塞的线程
         selector.wakeup();
     }
 
@@ -59,7 +62,6 @@ public class Handler implements Runnable {
         if (inputIsComplete()) {
             process();
             state = SENDING;
-
             sk.interestOps(SelectionKey.OP_WRITE);
         }
     }
@@ -70,4 +72,5 @@ public class Handler implements Runnable {
             sk.cancel();
         }
     }
+
 }
